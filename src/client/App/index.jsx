@@ -1,6 +1,6 @@
 import React from 'react';
 import GSAP from 'react-gsap-enhancer';
-import { TimelineMax } from 'gsap';
+import { TimelineMax, TweenLite, Elastic } from 'gsap';
 
 function createAnim() {
   const box = document.getElementById('box');
@@ -8,30 +8,48 @@ function createAnim() {
 
   // add api is not working for me
   // however you can sequencing different animation on timelineMax directly
-  const timelineM = new TimelineMax({ repeat: -1 });
-  timelineM.to(box, 1, { scale: 1.23, y: '+120' });
-  timelineM.to(box, 1, { scale: 1, y: '0' });
-  timelineM.to(box, 1, { rotation: 90 }, 1);
+  const timelineM = new TimelineMax();
+  timelineM.to(box, 1, { x: 300, y: 300 });
+  timelineM.to(box, 1, { x: 350, y: 350 }, 1);
+  // timelineM.to(box, 1, { scale: 1, y: '0', rotation: 90 });
 
-  // https://greensock.com/docs/TimelineMax/add() with multiple tweens it doesn't sequeece
-  // todo: work in jsfiddle mismatch? https://jsfiddle.net/veke646L/7/
-  const tween1 = (box1, 1, { scale: 1.23, y: '+120' });
-  const tween2 = (box1, 1, { scale: 1, y: '0' });
-  const tween3 = (box1, 1, { rotation: 90 }, 1);
+  const tween1 = TweenLite.to(box1, 1, { scale: 1.23, y: '-120' });
+  const tween2 = TweenLite.to(box1, 1, { scale: 1, y: '0', rotation: 90 }, 1);
 
-  timelineM.add([tween1, tween2, tween3], '', '', 0.5);
+  timelineM.add([tween1, tween2], '', '', 1);
 
   return timelineM;
+}
+
+function elasticJump(moveX, moveY) {
+  const timeLineM = new TimelineMax();
+  const ball = document.getElementById('circle');
+  console.log(moveX, moveY);
+  timeLineM.to(ball, 0.2, { x: moveX - 63, y: moveY - 63, ease: Elastic.easeOut });
+
+  return timeLineM;
 }
 
 class App extends React.Component {
   constructor(props) {
     super(props);
     this.state = { x: 300, y: 300 };
+    this.counter = false;
+    this.handleOnClick = this.handleOnClick.bind(this);
   }
 
   componentDidMount() {
     this.jumpAnim = this.addAnimation(createAnim);
+  }
+
+  handleOnClick(event) {
+    // Probably should only add once?
+    if (!this.counter) {
+      this.addAnimation(elasticJump);
+      this.counter = true;
+    }
+
+    return elasticJump(event.clientX, event.clientY);
   }
 
   render() {
@@ -44,19 +62,36 @@ class App extends React.Component {
       height: 123,
     };
 
+    const canvasStyle = {
+      width: '100%',
+      height: '100vh',
+      display: 'flex',
+    };
+
     const containerStyle = {
+      display: 'flex',
       position: 'absolute',
       width: '100%',
       height: '100%',
       top: x,
       left: y,
-      display: 'flex',
+    };
+
+    const circleStyle = {
+      width: 123,
+      height: 123,
+      borderRadius: 63,
+      backgroundColor: '#dbdad5',
+      position: 'absolute',
     };
 
     return (
-      <div style={containerStyle}>
-        <div id={'box'} style={style} />
-        <div id={'box1'} style={Object.assign({}, style, { backgroundColor: 'grey' })} />
+      <div id={'canvas'} style={canvasStyle} onClick={this.handleOnClick} role={'button'} tabIndex={-1} >
+        <div id={'container'} style={containerStyle}>
+          <div id={'box'} style={style} />
+          <div id={'box1'} style={Object.assign({}, style, { backgroundColor: 'grey' })} />
+        </div>
+        <div id={'circle'} style={circleStyle} />
       </div>
     );
   }
