@@ -6,12 +6,9 @@ function createAnim() {
   const box = document.getElementById('box');
   const box1 = document.getElementById('box1');
 
-  // add api is not working for me
-  // however you can sequencing different animation on timelineMax directly
   const timelineM = new TimelineMax();
-  timelineM.to(box, 1, { x: 300, y: 300 });
-  timelineM.to(box, 1, { x: 350, y: 350 }, 1);
-  // timelineM.to(box, 1, { scale: 1, y: '0', rotation: 90 });
+  timelineM.to(box, 1, { scale: 1.25, y: '+120' });
+  timelineM.to(box, 1, { scale: 1, y: '0', rotation: 90 });
 
   const tween1 = TweenLite.to(box1, 1, { scale: 1.23, y: '-120' });
   const tween2 = TweenLite.to(box1, 1, { scale: 1, y: '0', rotation: 90 }, 1);
@@ -34,7 +31,7 @@ class App extends React.Component {
   constructor(props) {
     super(props);
     this.state = { x: 300, y: 300 };
-    this.counter = false;
+    this.isAnimationAdded = false;
     this.handleOnClick = this.handleOnClick.bind(this);
   }
 
@@ -44,9 +41,9 @@ class App extends React.Component {
 
   handleOnClick(event) {
     // Probably should only add once?
-    if (!this.counter) {
+    if (!this.isAnimationAdded) {
       this.addAnimation(elasticJump);
-      this.counter = true;
+      this.isAnimationAdded = true;
     }
 
     return elasticJump(event.clientX, event.clientY);
